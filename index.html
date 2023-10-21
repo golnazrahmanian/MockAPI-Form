@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <div id="part1">
+            <div id="tab">
+                <div id="signupbtn">sign up</div>
+                <div id="signinbtn">sign in</div>
+            </div>
+        </div>
+        <div id="part2">
+            <div id="signup">
+                <input id="email" type="email" placeholder="email" required>
+                <input id="fullName" type="text" placeholder="full Name" required>
+                <input id="password" type="password" placeholder="password" required>
+                <input id="phonenumber" type="text" placeholder="phone number">
+                <select id="question">
+                    <option value="What is your favorite color?">What is your favorite color?</option>
+                    <option value="What is the name of your first pet?">What is the name of your first pet?</option>
+                    <option value="In what city were you born?">In what city were you born?</option>
+                    <option value="What high school did you attend?">What high school did you attend?</option>
+                    <option value="What was your favorite food as a child?">What was your favorite food as a child?
+                    </option>
+                    <option value="What was the model of your first car?">What was the model of your first car?</option>
+                </select>
+                <input type="text" id="answer" placeholder="answer" required>
+                <button onclick="adduser()">Sign Up</button>
+                <div id="list">
+                    <h3>your IP information:</h3>
+                </div>
+            </div>
+
+            <div id="signin">
+                <input type="text" id="emailin" placeholder="email">
+                <input type="password" id="passin" placeholder="password">
+                <button onclick="login()">Sign In</button>
+                <button onclick="forget()">Forget Password</button>
+                <div class="box" id="questionbox"></div>
+                <div class="box" id="answerbox"></div>
+                <div class="box" id="passbox"></div>
+                <div class="box" id="wlc"></div>
+            </div>
+        </div>
+    </div>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/md5-js-tools@1.0.2/lib/md5.min.js"></script>
+
+<script>
+    let signup = document.getElementById('signup')
+    let signin = document.getElementById('signin')
+    let signupbtn = document.getElementById('signupbtn')
+    let signinbtn = document.getElementById('signinbtn')
+    signupbtn.style.backgroundColor = '#7e185d'
+    signup.style.display = 'flex'
+    signin.style.display = 'none'
+    signupbtn.addEventListener('click', () => {
+        signupbtn.style.backgroundColor = '#7e185d'
+        signinbtn.style.backgroundColor = 'rgb(75, 63, 251)'
+        signup.style.display = 'flex'
+        signin.style.display = 'none'
+    })
+    signinbtn.addEventListener('click', () => {
+        signinbtn.style.backgroundColor = '#7e185d'
+        signupbtn.style.backgroundColor = 'rgb(75, 63, 251)'
+        signup.style.display = 'none'
+        signin.style.display = 'flex'
+    })
+
+    function get_ip() {
+        return fetch('https://api.ipify.org/?format=json')
+            .then(res => res.json())
+            .then(val => fetch('https://api.ipbase.com/v2/info?apikey=ipb_live_1U4D5KGiz4QYRa6lWSc0vV9xSxqOF74An5Jl1y5y&ip=' + val.ip))
+            .then(res => res.json())
+            .then(val => val.data)
+    }
+
+    get_ip().then(val => {
+        document.getElementById('list').innerHTML += `
+                <div>
+                    <h3>${val.ip}</h3>
+                    <h3>${val.location.country.name} ${val.location.country.emoji}</h3>
+                    <h3>${val.location.region.name}</h3>
+                    <h3>${val.location.city.name}</h3>
+                    <h3>${val.connection.isp}</h3>
+                </div>`
+    })
+
+    function adduser() {
+        const sampleData = {
+            email: document.getElementById('email').value,
+            fullName: document.getElementById('fullName').value,
+            pass: MD5.generate(document.getElementById('password').value),
+            phonenumber: document.getElementById('phonenumber').value,
+            question: document.getElementById('question').value,
+            answer: document.getElementById('answer').value,
+        };
+        if (sampleData.email == "" || sampleData.fullName == "" || sampleData.pass == "" || sampleData.answer == "") {
+            alert("Please fill all the inputs")
+            return;
+        }
+        fetch('https://652e5c180b8d8ddac0b13c60.mockapi.io/api/golnaz1/users', {
+            method: 'GET',
+            headers: { 'content-type': 'application/json' },
+        }).then(res => {
+            if (res.ok) {
+                return res.json();
+            }
+        }).then(val => {
+            for (i = 0; i < val.length; i++) {
+                if (val[i].email == sampleData.email) {
+                    alert("user already signed up")
+                    break;
+                    throw "exit";
+                }
+            }
+        }).catch(error => {
+            alert(error.messsage)
+        })
+
+        fetch('https://652e5c180b8d8ddac0b13c60.mockapi.io/api/golnaz1/users', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify(sampleData)
+        }).then(res => {
+            if (res.ok) {
+                return res.json();
+            }
+        }).then(task => {
+            alert('user added')
+        }).catch(error => {
+            alert('user not added to db ' + error.messsage)
+        })
+    }
+
+    function login() {
+        let email = document.getElementById('emailin').value
+        let _pass = MD5.generate(document.getElementById('passin').value)
+        flag=0
+        fetch('https://652e5c180b8d8ddac0b13c60.mockapi.io/api/golnaz1/users', {
+            method: 'GET',
+            headers: { 'content-type': 'application/json' },
+        }).then(res => {
+            if (res.ok) {
+                return res.json();
+            }
+        }).then(val => {
+            for (i = 0; i < val.length; i++) {
+                if ((val[i].email == email) && (val[i].pass == _pass)) {
+                    document.getElementById('wlc').innerHTML = `<h2>Welcome ${val[i].fullName}</h2>`
+                    flag = 1;
+                    break;
+                }
+            }
+            if (flag != 1) {
+                document.getElementById('wlc').innerHTML = "Email or Password is incorrect"
+            }
+        }).catch(error => {
+            alert(error.messsage)
+        })
+    }
+
+    function forget() {
+        let email = document.getElementById('emailin').value
+        flag=0
+        fetch('https://652e5c180b8d8ddac0b13c60.mockapi.io/api/golnaz1/users', {
+            method: 'GET',
+            headers: { 'content-type': 'application/json' },
+        }).then(res => {
+            if (res.ok) {
+                return res.json();
+            }
+        }).then(val => {
+            for (i = 0; i < val.length; i++) {
+                if (val[i].email == email) {
+                    document.getElementById('questionbox').innerHTML = `<h2>${val[i].question} </h2>`
+                    flag = 1
+                    break;
+                }
+            }
+            if (flag != 1) {
+                document.getElementById('questionbox').innerHTML = "User not found"
+            }
+        }).catch(error => {
+            alert(error.messsage)
+        })
+        _set = setInterval(check, 100)
+    }
+
+    function check() {
+        data = document.getElementById('questionbox').innerHTML
+        if (data != '') {
+            clearInterval(_set);
+            if (data != "not found") {
+                document.getElementById('answerbox').innerHTML += `
+                    <input type="text" id="answerin" placeholder="answer">
+                    <button class="btn" onclick="reset()">reset password</button>`
+            }
+        }
+    }
+
+    function reset() {
+        let email = document.getElementById('emailin').value
+        let answer = document.getElementById('answerin').value
+        flag=0
+        fetch('https://652e5c180b8d8ddac0b13c60.mockapi.io/api/golnaz1/users', {
+            method: 'GET',
+            headers: { 'content-type': 'application/json' },
+        }).then(res => {
+            if (res.ok) {
+                return res.json();
+            }
+        }).then(val => {
+            for (i = 0; i < val.length; i++) {
+                if (val[i].email == email && val[i].answer == answer) {
+                    flag = 1
+                    document.getElementById('passbox').innerHTML += `
+                            <input type="password" id="newpass" placeholder="new password">
+                            <button class="btn" onclick="send(${val[i].id})">set password</button>`
+                    break;
+                }
+            }
+            if (flag != 1) {
+                document.getElementById('passbox').innerHTML = "Answer is not correct"
+            }
+
+        }).catch(error => {
+            alert(error.messsage)
+        })
+    }
+
+    function send(id) {
+        let newpass = MD5.generate(document.getElementById('newpass').value)
+        let email = document.getElementById('emailin').value
+        fetch('https://652e5c180b8d8ddac0b13c60.mockapi.io/api/golnaz1/users/' + id, {
+            method: 'PUT',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ pass: newpass })
+        }).then(res => {
+            if (res.ok) {
+                alert("password changed")
+                return res.json();
+            }
+        }).catch(error => {
+            alert(error.messsage)
+        })
+    }
+</script>
+
+</html>
