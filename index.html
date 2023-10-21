@@ -199,7 +199,7 @@
         data = document.getElementById('questionbox').innerHTML
         if (data != '') {
             clearInterval(_set);
-            if (data != "not found") {
+            if (data != "User not found") {
                 document.getElementById('answerbox').innerHTML += `
                     <input type="text" id="answerin" placeholder="answer">
                     <button class="btn" onclick="reset()">reset password</button>`
